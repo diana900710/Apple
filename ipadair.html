@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        /* 最外div */
+        .wrap{
+            display: flex;
+            width: 1500px;
+            margin: auto;
+        }
+        /* 圖片 */
+        .img{
+            width: 900px;
+            box-sizing: border-box;
+        }
+        #img{
+            width: 100%;
+            vertical-align: top;
+        }
+        /* 右邊div */
+        .container{
+            width: 600px;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        h1{text-align: center;} /* 標題 */
+        /* 分color、storage、network三個區塊選擇 */
+        .change{
+            border-top: 1px solid #999;
+            border-bottom: 1px solid #999;
+        }
+        .change div{ /* .check */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .change:nth-child(3){ /* 中間storage的上下邊線unset */
+            border: unset;
+        }
+        input{display: none;} /* 隱藏選擇框 */
+        .check label{color: #00f;}
+        .color, .storage, .network{display: none;} /* 隱藏更改選項-radio */
+        /* 選項名稱設定 */
+        .color label, .storage label, .network label{
+            width: 150px;
+            text-align: center;
+            border: 1px solid #000;
+            padding: 5px 0;
+            border-radius: 10px;
+        }
+        /* 3區塊擊點-顯示變更nav */
+        #changeColor:checked ~ .color, #changeStorage:checked ~ .storage, #changeNetwork:checked ~ .network{
+            display: flex;
+            gap: 10px;
+            border-top: 1px dashed #999;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+        /* 更變選項擊點 */
+        input[type=radio]:checked+label{color: #f00;font-weight: 800;}
+        /* 價錢 */
+        #price{
+            font-size: 36px;
+            font-weight: 800;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="img"><img id="img"></div>
+        <div class="container">
+            <h1>購買iPad Air</h1>
+            <div class="change">
+                <input type="checkbox" id="changeColor">
+                <div class="check">                    
+                    <h2 id="color"></h2>
+                    <label for="changeColor">更改</label>
+                </div>
+                <nav class="color">
+                    <input type="radio" name="color" id="checkColor1" value="太空灰色" checked>
+                    <label for="checkColor1">太空灰色</label>
+                    <input type="radio" name="color" id="checkColor2" value="藍色">
+                    <label for="checkColor2">藍色</label>
+                    <input type="radio" name="color" id="checkColor3" value="粉紅色">
+                    <label for="checkColor3">粉紅色</label>
+                    <input type="radio" name="color" id="checkColor4" value="紫色">
+                    <label for="checkColor4">紫色</label>
+                    <input type="radio" name="color" id="checkColor5" value="星光色">
+                    <label for="checkColor5">星光色</label>
+                </nav>
+            </div>
+            <div class="change">
+                <input type="checkbox" id="changeStorage">
+                <div class="check">                    
+                    <h2 id="storage"></h2>
+                    <label for="changeStorage">更改</label>
+                </div>
+                <nav class="storage">
+                    <input type="radio" name="storage" id="checkStorage1" value="64GB" checked>
+                    <label for="checkStorage1">64GB</label>
+                    <input type="radio" name="storage" id="checkStorage2" value="256GB">
+                    <label for="checkStorage2">256GB</label>
+                </nav>
+            </div>
+            <div class="change">
+                <input type="checkbox" id="changeNetwork">
+                <div class="check">
+                    <h2 id="network"></h2>
+                    <label for="changeNetwork">更改</label>
+                </div>
+                <nav class="network">
+                    <input type="radio" name="network" id="checkNetwork1" value="Wi-Fi" checked>
+                    <label for="checkNetwork1">Wi-Fi</label>
+                    <input type="radio" name="network" id="checkNetwork2" value="Wi-Fi + 行動網路">
+                    <label for="checkNetwork2">Wi-Fi + 行動網路</label>
+                </nav>
+            </div>
+            <p id="price"></p>
+        </div>
+    </div>
+
+    <script>
+        let url = "/ipadair.json";
+
+        let colorFont = document.getElementById("color");
+        let storageFont = document.getElementById("storage");
+        let networkFont = document.getElementById("network");
+        let img = document.getElementById("img");
+        let price = document.getElementById("price");
+
+        let color = document.getElementsByName("color");
+        let storage = document.getElementsByName("storage");
+        let network = document.getElementsByName("network");
+        let value = [];
+
+        value.push(color[0].defaultValue);
+        value.push(storage[0].defaultValue);
+        value.push(network[0].defaultValue);
+
+        let changed;
+        window.onload = function(){
+            
+            colorFont.innerText = value[0];
+            storageFont.innerText = value[1];
+            networkFont.innerText = value[2];
+            requestIpadJson();
+        }
+        let ipadArray = [];
+        
+        let xhr = new XMLHttpRequest();
+        function requestIpadJson() {
+            xhr.onload = function () {
+                ipadArray = this.response;
+                let ipad = ipadArray.find(item=> item.color == value[0] && item.storage == value[1] && item.network == value[2]);
+                console.log(ipad);
+                img.src = ipad.picture;
+                price.innerText = `NT$${numberComma(ipad.price)}`;
+            }
+
+            xhr.open("GET", url);
+            xhr.responseType="json";
+            xhr.send();
+        }
+        color.forEach(radio => radio.addEventListener('change', () => {
+            colorFont.innerText = radio.value;
+            value[0] = radio.value;
+            requestIpadJson();
+        }
+        ));
+        storage.forEach(radio => radio.addEventListener('change', () => {
+            storageFont.innerText = radio.value;
+            value[1] = radio.value;
+            requestIpadJson();
+        }));
+        network.forEach(radio => radio.addEventListener('change', () => {
+            networkFont.innerText = radio.value;
+            value[2] = radio.value;
+            requestIpadJson();
+        }));
+        console.log(value);
+
+        function numberComma(num){
+            let comma=/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g
+            return num.toString().replace(comma, ',')
+        }
+    </script>
+</body>
+</html>
